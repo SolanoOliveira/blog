@@ -15,9 +15,17 @@ test('visitante lê; autor publica texto e foto; sessão encerra', async ({ page
   await page.getByRole('button', { name: 'Entrar na área do autor' }).click();
   await expect(page.getByRole('heading', { name: 'Uma nova história.' })).toBeVisible();
   await page.getByLabel('Título', { exact: true }).fill('Uma pausa no caminho');
-  await page
-    .getByLabel('Seu texto', { exact: true })
-    .fill('Uma fotografia para lembrar do dia.\nAs pequenas coisas também merecem espaço.');
+  const before = '## Um dia comum\n\nUm **instante** antes da foto.';
+  const after =
+    '\n\nDepois da foto, a história continua com *calma*.\n\n- Uma lembrança\n- Outra ideia';
+  const field = page.getByLabel('Seu texto', { exact: false });
+  await field.fill(before + after);
+  await field.evaluate((element, position) => {
+    const textarea = element as HTMLTextAreaElement;
+    textarea.focus();
+    textarea.setSelectionRange(position, position);
+    textarea.dispatchEvent(new Event('select'));
+  }, before.length);
   await page.getByLabel('Fotos', { exact: false }).setInputFiles({
     name: 'foto.png',
     mimeType: 'image/png',
@@ -27,6 +35,12 @@ test('visitante lê; autor publica texto e foto; sessão encerra', async ({ page
     ),
   });
   await expect(page.getByRole('img', { name: 'Foto selecionada para a postagem' })).toBeVisible();
+  await expect(field).toHaveValue(/!\[foto\]\(\/api\/images\//);
+  await page.getByRole('button', { name: 'Prévia', exact: true }).click();
+  const preview = page.getByLabel('Prévia da postagem');
+  await expect(preview.getByRole('heading', { name: 'Um dia comum' })).toBeVisible();
+  await expect(preview.locator('strong')).toHaveText('instante');
+  await expect(preview.getByRole('img', { name: 'foto', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Publicar texto' }).click();
   await expect(page.getByRole('heading', { name: 'Uma pausa no caminho' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText('Seu texto foi publicado');
@@ -36,14 +50,29 @@ test('visitante lê; autor publica texto e foto; sessão encerra', async ({ page
   await visitor.goto(url);
   await expect(visitor.getByRole('heading', { name: 'Uma pausa no caminho' })).toBeVisible();
   await expect(visitor.getByRole('button', { name: 'Excluir postagem' })).toHaveCount(0);
-  await expect(
-    visitor.getByRole('img', { name: 'Foto 1 da postagem Uma pausa no caminho' }),
-  ).toBeVisible();
+  await expect(visitor.getByRole('img', { name: 'foto', exact: true })).toBeVisible();
+  const reading = visitor.locator('.reading .markdown-body');
+  await expect(reading.locator('strong')).toHaveText('instante');
+  await expect(reading.locator('em')).toHaveText('calma');
+  await expect(reading.locator('li')).toHaveCount(2);
+  expect(await reading.locator(':scope > p').allTextContents()).toEqual([
+    'Um instante antes da foto.',
+    '',
+    'Depois da foto, a história continua com calma.',
+  ]);
   await visitor.goto('/');
   await expect(visitor.getByRole('heading', { name: 'Postagens', exact: true })).toBeVisible();
   await expect(visitor.getByRole('heading', { name: 'Uma pausa no caminho' })).toBeVisible();
   await expect(visitor.getByRole('button', { name: 'Escrever', exact: true })).toHaveCount(0);
   await context.close();
+  await page.getByRole('button', { name: 'Editar postagem', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Editar postagem' })).toBeVisible();
+  await page
+    .getByLabel('Seu texto', { exact: false })
+    .fill((await field.inputValue()) + '\n\n## Atualização\n\nUma nova nota.');
+  await page.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(page.getByRole('heading', { name: 'Atualização', exact: true })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('Postagem atualizada');
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Excluir postagem' }).click();
   await expect(page.getByRole('heading', { name: 'Nenhuma postagem ainda.' })).toBeVisible();
@@ -65,8 +94,17 @@ test('tema respeita o sistema, permite alternar e mantém a escolha ao recarrega
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  const darkBackground = await page
+    .locator('html')
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
   await page.getByRole('button', { name: 'Ativar modo claro' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  const lightBackground = await page
+    .locator('html')
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(lightBackground).not.toBe(darkBackground);
+  expect(lightBackground).toBe('rgb(255, 253, 250)');
+  expect(darkBackground).toBe('rgb(30, 28, 33)');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await page.setViewportSize({ width: 375, height: 812 });
@@ -79,4 +117,58 @@ test('tema respeita o sistema, permite alternar e mantém a escolha ao recarrega
   await page.goto('/?autor=1');
   await expect(page.getByRole('heading', { name: 'Área do autor' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
+test('Markdown remove scripts, eventos e links executáveis', async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as any).__markdownXss = 0;
+  });
+  await page.route('**/api/posts', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 99,
+          title: 'Conteúdo seguro',
+          createdAt: '2026-10-24T12:00:00Z',
+          images: [],
+          content:
+            '## Um título\n\n**Negrito** e *itálico*.\n\n<script>window.__markdownXss=1</script>\n\n<img src="x" onerror="window.__markdownXss=1">\n\n[Link perigoso](javascript:window.__markdownXss=1)\n\n```js\nconst valor = 1;\n```',
+        },
+      ],
+    }),
+  );
+  await page.goto('/?post=99');
+  const body = page.locator('.markdown-body');
+  await expect(body.getByRole('heading', { name: 'Um título' })).toBeVisible();
+  await expect(body.locator('strong')).toHaveText('Negrito');
+  await expect(body.locator('pre code')).toContainText('const valor = 1;');
+  await expect(body.locator('script,iframe,[onerror],a[href^="javascript:"]')).toHaveCount(0);
+  expect(await page.evaluate(() => (window as any).__markdownXss)).toBe(0);
+});
+
+test('fotos Markdown com legenda não duplicam e fotos antigas continuam visíveis', async ({
+  page,
+}) => {
+  await page.route('**/api/posts', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 100,
+          title: 'Fotos no texto',
+          createdAt: '2026-10-24T12:00:00Z',
+          images: ['/api/images/inline.png', '/api/images/legacy.png'],
+          content:
+            'Antes da foto.\n\n![Uma foto](/api/images/inline.png "Legenda")\n\nDepois da foto.\n\n```md\n![Exemplo de código](/api/images/legacy.png)\n```',
+        },
+      ],
+    }),
+  );
+  await page.goto('/?post=100');
+  await expect(page.locator('.markdown-body img')).toHaveCount(1);
+  await expect(page.locator('.markdown-body img')).toHaveAttribute('title', 'Legenda');
+  await expect(page.locator('.article-images img')).toHaveCount(1);
+  await expect(page.locator('.article-images img')).toHaveAttribute(
+    'src',
+    '/api/images/legacy.png',
+  );
 });

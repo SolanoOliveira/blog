@@ -34,6 +34,12 @@ class BlogApplicationTests {
                 .content("{\"title\":\"x\",\"content\":\"y\",\"images\":[]}"))
         .andExpect(status().isUnauthorized());
     mvc.perform(
+            put("/api/posts/1")
+                .with(csrf())
+                .contentType("application/json")
+                .content("{\"title\":\"x\",\"content\":\"y\",\"images\":[]}"))
+        .andExpect(status().isUnauthorized());
+    mvc.perform(
             multipart("/api/images")
                 .file(new MockMultipartFile("file", "x.png", "image/png", new byte[] {1}))
                 .with(csrf()))
@@ -97,6 +103,30 @@ class BlogApplicationTests {
     mvc.perform(get("/api/posts/" + id))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.images[0]").value(image));
+    String originalCreatedAt =
+        json.readTree(
+                mvc.perform(get("/api/posts/" + id)).andReturn().getResponse().getContentAsString())
+            .get("createdAt")
+            .asText();
+    String edited =
+        json.writeValueAsString(
+            java.util.Map.of(
+                "title",
+                "Título revisado",
+                "content",
+                "## Texto revisado\n\n**Markdown**",
+                "images",
+                java.util.List.of(image)));
+    mvc.perform(put("/api/posts/" + id).contentType("application/json").content(edited))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            put("/api/posts/" + id).with(csrf()).contentType("application/json").content(edited))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("Título revisado"))
+        .andExpect(jsonPath("$.createdAt").value(originalCreatedAt));
+    mvc.perform(get("/api/posts/" + id))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").value("## Texto revisado\n\n**Markdown**"));
     mvc.perform(delete("/api/posts/" + id)).andExpect(status().isForbidden());
     mvc.perform(delete("/api/posts/" + id).with(csrf())).andExpect(status().isNoContent());
     mvc.perform(get("/api/posts/" + id)).andExpect(status().isNotFound());

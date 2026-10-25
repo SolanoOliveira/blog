@@ -1,8 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { marked } from 'marked';
+import { MarkdownPipe } from './markdown.pipe';
+import { SketchIcon } from './sketch-icon';
 interface Post {
   id: number;
   title: string;
@@ -12,7 +15,7 @@ interface Post {
 }
 @Component({
   selector: 'app-root',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, MarkdownPipe, SketchIcon],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -38,6 +41,58 @@ export class App {
   error = signal('');
   notice = signal('');
   images = signal<string[]>([]);
+  @ViewChild('contentEditor') contentEditor?: ElementRef<HTMLTextAreaElement>;
+  preview = signal(false);
+  editingId = signal<number | null>(null);
+  private cursor = 0;
+  private selectionEnd = 0;
+  rememberCursor() {
+    const field = this.contentEditor?.nativeElement;
+    if (field) {
+      this.cursor = field.selectionStart;
+      this.selectionEnd = field.selectionEnd;
+    }
+  }
+  insertMarkdown(before: string, after = '', placeholder = '') {
+    const start = Math.min(this.cursor, this.content.length);
+    const end = Math.min(this.selectionEnd, this.content.length);
+    const selected = this.content.slice(start, end) || placeholder;
+    const inserted = before + selected + after;
+    if (this.content.length - (end - start) + inserted.length > 100000) {
+      this.error.set('O texto deve ter até 100.000 caracteres.');
+      return;
+    }
+    this.content = this.content.slice(0, start) + inserted + this.content.slice(end);
+    this.cursor = this.selectionEnd = start + inserted.length;
+    this.preview.set(false);
+    setTimeout(() => {
+      const field = this.contentEditor?.nativeElement;
+      field?.focus();
+      field?.setSelectionRange(this.cursor, this.cursor);
+    });
+  }
+  insertImage(url: string, alt = 'Descrição da foto') {
+    this.insertMarkdown('\n\n![' + alt + '](' + url + ')\n\n');
+  }
+  unplacedImages = computed(() => {
+    const post = this.selected();
+    if (!post) return [];
+    const used = new Set<string>();
+    marked.walkTokens(marked.lexer(post.content), (token) => {
+      if (token.type === 'image') used.add(token.href);
+    });
+    return post.images.filter((image) => !used.has(image));
+  });
+  edit(post: Post) {
+    this.home();
+    this.editingId.set(post.id);
+    this.title = post.title;
+    this.content = post.content;
+    this.images.set([...post.images]);
+    this.cursor = this.selectionEnd = this.content.length;
+    this.preview.set(false);
+    this.view.set('editor');
+  }
   username = 'admin';
   password = '';
   title = '';
@@ -81,7 +136,16 @@ export class App {
     this.home();
     this.view.set('login');
   }
+  newPost() {
+    this.title = '';
+    this.content = '';
+    this.images.set([]);
+    this.editingId.set(null);
+    this.cursor = this.selectionEnd = 0;
+    this.editor();
+  }
   editor() {
+    this.preview.set(false);
     this.home();
     this.view.set('editor');
   }
@@ -120,7 +184,11 @@ export class App {
     }
   }
   removeImage(image: string) {
+    this.content = this.content.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (match, url: string) =>
+      url === image ? '' : match,
+    );
     this.images.update((items) => items.filter((item) => item !== image));
+    this.cursor = this.selectionEnd = Math.min(this.cursor, this.content.length);
   }
   async upload(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -130,6 +198,7 @@ export class App {
       input.value = '';
       return;
     }
+    this.preview.set(false);
     this.busy.set(true);
     this.error.set('');
     try {
@@ -140,6 +209,7 @@ export class App {
         data.append('file', file);
         const result = await firstValueFrom(this.http.post<{ url: string }>('/api/images', data));
         this.images.update((imgs) => [...imgs, result.url]);
+        this.insertImage(result.url, file.name.replace(/[\[\]\r\n]/g, ' ').replace(/\.[^.]+$/, ''));
       }
     } catch (e) {
       this.error.set(
@@ -158,19 +228,20 @@ export class App {
     this.error.set('');
     try {
       await this.csrf();
+      const payload = { title: this.title, content: this.content, images: this.images() };
       const post = await firstValueFrom(
-        this.http.post<Post>('/api/posts', {
-          title: this.title,
-          content: this.content,
-          images: this.images(),
-        }),
+        this.editingId() === null
+          ? this.http.post<Post>('/api/posts', payload)
+          : this.http.put<Post>('/api/posts/' + this.editingId(), payload),
       );
+      const updated = this.editingId() !== null;
+      this.editingId.set(null);
       this.title = '';
       this.content = '';
       this.images.set([]);
       await this.load();
       this.open(post);
-      this.notice.set('Seu texto foi publicado.');
+      this.notice.set(updated ? 'Postagem atualizada.' : 'Seu texto foi publicado.');
     } catch (e) {
       if (e instanceof HttpErrorResponse && e.status === 401) {
         this.admin.set(false);

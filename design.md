@@ -1,12 +1,13 @@
 ---
 version: "alpha"
-name: "Blog Pastel"
-description: "Blog minimalista em tons pastéis, cantos arredondados e temas claro e escuro."
+name: "Solano — cores e traços"
+description: "Blog minimalista com paleta do autor, temas contrastantes e ícones desenhados à mão."
 colors:
-  primary: "#303B3B"
-  secondary: "#596666"
-  tertiary: "#D6E8DF"
-  neutral: "#FBF9F6"
+  teal: "#087E8B"
+  coral: "#FF5A5F"
+  charcoal: "#3C3C3C"
+  amber: "#FFBC42"
+  lilac: "#E2C2FF"
 typography:
   h1:
     fontFamily: System UI stack
@@ -28,9 +29,13 @@ rounded:
 
 ## Direção visual
 
-Referência atualizada pelo pedido mais recente do autor: manter a estrutura simples, com tons pastéis e cantos mais arredondados. Tema claro em creme, branco e verde-sálvia suave; texto escuro para preservar contraste. Tema escuro em carvão azulado, superfícies suaves e detalhes em verde pastel. Sem sombras ou gradientes.
+Paleta solicitada pelo autor: teal nas ações do modo claro; coral nos detalhes e traços; carvão como base escura; amarelo nos destaques e botões do modo escuro; lilás em ícones e links do modo escuro. Preservar os valores exatos da paleta nos elementos de destaque, usando neutros de apoio para leitura.
 
-Botões e campos com raio de 16px; cartões e estados vazios com 24px; controle de tema circular. O botão no cabeçalho permite alternar claro/escuro. A preferência é salva no navegador e aplicada antes da inicialização do Angular. Na primeira visita, respeitar a preferência do sistema. O controle deve continuar funcionando quando o armazenamento local estiver indisponível.
+O tema claro tem fundo quase branco `#FFFDFA`, superfícies brancas e texto carvão. O escuro tem fundo `#1E1C21`, superfícies carvão `#3C3C3C` e texto claro. Os temas devem ser visualmente distintos, incluindo formulários, prévia, código e leitura de postagens.
+
+Botões e campos com raio de 16px; cartões e estados vazios com 24px. Controle no cabeçalho com ícone e texto “Claro” ou “Escuro”. Preferência salva no navegador e aplicada antes da inicialização do Angular; na primeira visita seguir o sistema. Continuar funcionando sem armazenamento local.
+
+Ícones SVG originais com traços levemente irregulares, como desenhos de caneta: sol, lua, documento, imagem, olho, caneta e setas. Sem emojis, dependências de fontes de ícones ou filtros artificiais sobre os textos. Sem sombras ou gradientes.
 
 ## Página inicial
 
@@ -48,7 +53,7 @@ Essa escolha segue o pedido explícito de simplificar o blog, substituindo o her
 
 ## Componentes e acessibilidade
 
-- Botões primários em verde pastel com texto escuro; hover com mudança de cor, sem sombras.
+- Botões primários teal com texto branco no claro e amarelos com texto carvão no escuro; hover com mudança de cor, sem sombras.
 - Campos com rótulos acima e borda simples. Foco visível com contorno contrastante e afastamento de 2–4px.
 - Ícones SVG quando necessários, sem emojis.
 - Estado vazio com ícone e mensagem curta. Ação de escrever somente para administrador autenticado.
@@ -58,4 +63,4 @@ Essa escolha segue o pedido explícito de simplificar o blog, substituindo o her
 
 ## Funcionalidade
 
-Visitantes leem sem login. Apenas o administrador publica textos e fotos ou exclui postagens. A autenticação e as permissões continuam sendo verificadas no backend.
+Visitantes leem sem login. Apenas o administrador publica, edita e exclui postagens. O editor usa Markdown com prévia e inserção de fotos na posição do cursor, entre os parágrafos. A autenticação e as permissões continuam sendo verificadas no backend.

@@ -11,25 +11,12 @@
       [attr.aria-label]="darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'"
       [attr.title]="darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'"
     >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        @if (darkMode()) {
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
-        } @else {
-          <path d="M20 14a8.5 8.5 0 0 1-10-10 8.5 8.5 0 1 0 10 10Z" />
-        }
-      </svg>
+      <app-sketch-icon [name]="darkMode() ? 'sun' : 'moon'" />
+      <span>{{ darkMode() ? 'Claro' : 'Escuro' }}</span>
     </button>
     @if (admin()) {
-      <button class="button small" (click)="editor()">Escrever</button
+      <button class="button small" (click)="newPost()">
+        <app-sketch-icon name="pen" /> Escrever</button
       ><button class="nav-link" (click)="logout()">Sair</button>
     }
   </nav>
@@ -38,7 +25,9 @@
   @if (error()) {
     <div class="message error" role="alert">
       {{ error() }}
-      <button class="text-button" (click)="error.set('')" aria-label="Fechar mensagem">×</button>
+      <button class="text-button" (click)="error.set('')" aria-label="Fechar mensagem">
+        <app-sketch-icon name="close" />
+      </button>
     </div>
   }
   @if (notice()) {
@@ -65,17 +54,20 @@
           autocomplete="current-password"
           required
         /><button class="button" [disabled]="busy()">
-          {{ busy() ? 'Entrando…' : 'Entrar na área do autor' }} <span aria-hidden="true">→</span>
+          {{ busy() ? 'Entrando…' : 'Entrar na área do autor' }} <app-sketch-icon name="arrow" />
         </button>
       </form>
-      <button class="text-button" (click)="home()">← Voltar para os textos</button>
+      <button class="text-button" (click)="home()">
+        <app-sketch-icon name="back" /> Voltar para os textos
+      </button>
     </section>
   } @else if (view() === 'editor' && admin()) {
     <section class="editor">
-      <button class="text-button" (click)="home()">← Voltar para o blog</button
+      <button class="text-button" (click)="home()">
+        <app-sketch-icon name="back" /> Voltar para o blog</button
       ><span class="eyebrow">ÁREA DO AUTOR</span>
-      <h1>Uma nova história.</h1>
-      <p class="muted">Adicione um título, seu texto e fotos opcionais.</p>
+      <h1>{{ editingId() === null ? 'Uma nova história.' : 'Editar postagem' }}</h1>
+      <p class="muted">Escreva em Markdown e coloque as fotos onde quiser no texto.</p>
       <form (ngSubmit)="publish()">
         <label for="title">Título</label
         ><input
@@ -85,17 +77,90 @@
           maxlength="160"
           placeholder="Dê um nome ao seu texto"
           required
-        /><label for="content">Seu texto</label
-        ><textarea
+        /><label for="content">Seu texto <span class="muted">· Markdown</span></label>
+        <div class="markdown-toolbar" role="toolbar" aria-label="Formatação Markdown">
+          <button
+            type="button"
+            (click)="insertMarkdown('**', '**', 'texto em negrito')"
+            [disabled]="busy()"
+            aria-label="Inserir negrito"
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            type="button"
+            (click)="insertMarkdown('*', '*', 'texto em itálico')"
+            [disabled]="busy()"
+            aria-label="Inserir itálico"
+          >
+            <em>I</em>
+          </button>
+          <button
+            type="button"
+            (click)="insertMarkdown('\n## ', '\n', 'Subtítulo')"
+            [disabled]="busy()"
+            aria-label="Inserir subtítulo"
+          >
+            H2
+          </button>
+          <button
+            type="button"
+            (click)="insertMarkdown('\n- ', '\n', 'Item da lista')"
+            [disabled]="busy()"
+            aria-label="Inserir lista"
+          >
+            Lista
+          </button>
+          <button
+            type="button"
+            (click)="insertMarkdown('[', '](https://)', 'Texto do link')"
+            [disabled]="busy()"
+            aria-label="Inserir link"
+          >
+            Link
+          </button>
+          <button
+            type="button"
+            class="preview-toggle"
+            (click)="preview.set(!preview())"
+            [attr.aria-pressed]="preview()"
+          >
+            <app-sketch-icon [name]="preview() ? 'pen' : 'eye'" />{{
+              preview() ? 'Escrever' : 'Prévia'
+            }}
+          </button>
+        </div>
+        <textarea
+          #contentEditor
           id="content"
           name="content"
           [(ngModel)]="content"
           maxlength="100000"
           rows="14"
-          placeholder="O que você gostaria de contar?"
+          placeholder="## Um novo texto&#10;&#10;Escreva aqui. Use **negrito**, *itálico* e adicione fotos entre os parágrafos."
+          [hidden]="preview()"
+          [readOnly]="busy()"
+          (click)="rememberCursor()"
+          (keyup)="rememberCursor()"
+          (select)="rememberCursor()"
+          (blur)="rememberCursor()"
+          aria-describedby="markdown-help"
           required
-        ></textarea
-        ><label for="photos">Fotos <span class="muted">· opcional</span></label>
+        ></textarea>
+        @if (preview()) {
+          <div
+            class="markdown-body editor-preview"
+            aria-label="Prévia da postagem"
+            [innerHTML]="content | markdown"
+          ></div>
+        }
+        <p id="markdown-help" class="muted markdown-help">
+          Use Markdown para títulos, listas, links, citações e código. Selecione um trecho para
+          formatar. As fotos entram na posição do cursor; recorte e cole a marcação para movê-las.
+        </p>
+        <label for="photos"
+          ><app-sketch-icon name="image" /> Fotos <span class="muted">· opcional</span></label
+        >
         <div class="upload">
           <input
             id="photos"
@@ -114,9 +179,18 @@
                 type="button"
                 class="remove-photo"
                 (click)="removeImage(image)"
+                [disabled]="busy()"
                 aria-label="Remover foto"
               >
-                ×
+                <app-sketch-icon name="close" />
+              </button>
+              <button
+                type="button"
+                class="insert-photo"
+                (click)="insertImage(image)"
+                [disabled]="busy()"
+              >
+                Inserir no texto
               </button>
             </figure>
           }
@@ -124,32 +198,27 @@
         <div class="editor-actions">
           <span class="muted">A postagem ficará visível para todos.</span
           ><button class="button" [disabled]="busy() || !title.trim() || !content.trim()">
-            {{ busy() ? 'Preparando…' : 'Publicar texto' }}
-            <svg
-              class="icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              aria-hidden="true"
-            >
-              <path d="M6 18 18 6M6 6h12v12" />
-            </svg>
+            {{
+              busy() ? 'Preparando…' : editingId() === null ? 'Publicar texto' : 'Salvar alterações'
+            }}
+            <app-sketch-icon name="arrow" />
           </button>
         </div>
       </form>
     </section>
   } @else if (selected(); as post) {
     <article class="reading">
-      <button class="text-button" (click)="home()">← Todos os textos</button>
+      <button class="text-button" (click)="home()">
+        <app-sketch-icon name="back" /> Todos os textos
+      </button>
       <div class="post-meta">
         <span>POR SOLANO OLIVEIRA</span><span>{{ post.createdAt | date: 'dd/MM/yyyy' }}</span>
       </div>
       <h1>{{ post.title }}</h1>
       <div class="reading-line"></div>
-      <p class="post-body">{{ post.content }}</p>
+      <div class="post-body markdown-body" [innerHTML]="post.content | markdown"></div>
       <div class="article-images">
-        @for (image of post.images; track image; let i = $index) {
+        @for (image of unplacedImages(); track image; let i = $index) {
           <img
             [src]="image"
             [alt]="'Foto ' + (i + 1) + ' da postagem ' + post.title"
@@ -162,6 +231,9 @@
           <strong>Solano Oliveira</strong>
         </div>
         @if (admin()) {
+          <button class="text-button" (click)="edit(post)">
+            <app-sketch-icon name="pen" /> Editar postagem
+          </button>
           <button class="text-button danger" (click)="remove(post)" [disabled]="busy()">
             Excluir postagem
           </button>
@@ -182,32 +254,13 @@
         <div class="skeleton" role="status" aria-label="Carregando postagens"></div>
       } @else if (posts().length === 0) {
         <div class="empty">
-          <svg
-            width="42"
-            height="42"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.2"
-            aria-hidden="true"
-          >
-            <path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h5" />
-          </svg>
+          <app-sketch-icon class="empty-icon" name="page" />
           <h3>Nenhuma postagem ainda.</h3>
           <p>As novas postagens aparecerão aqui.</p>
           @if (admin()) {
-            <button class="button" (click)="editor()">
+            <button class="button" (click)="newPost()">
               Escrever a primeira postagem
-              <svg
-                class="icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                aria-hidden="true"
-              >
-                <path d="M6 18 18 6M6 6h12v12" />
-              </svg>
+              <app-sketch-icon name="arrow" />
             </button>
           }
         </div>
@@ -235,19 +288,10 @@
                 <h3>
                   <button (click)="open(post)">{{ post.title }}</button>
                 </h3>
-                <p class="excerpt">{{ post.content }}</p>
+                <p class="excerpt">{{ post.content | markdown: 'text' }}</p>
                 <button class="read-link" (click)="open(post)">
                   Ler o texto
-                  <svg
-                    class="icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    aria-hidden="true"
-                  >
-                    <path d="M6 18 18 6M6 6h12v12" />
-                  </svg>
+                  <app-sketch-icon name="arrow" />
                 </button>
               </div>
             </article>

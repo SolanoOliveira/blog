@@ -1,16 +1,41 @@
 # Solano Oliveira — palavras e instantes
 
-Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): cores pastéis, cantos arredondados e layout responsivo, sem sombras ou gradientes. O botão no cabeçalho alterna entre os modos claro e escuro; a escolha fica salva no navegador e, na primeira visita, segue o tema do sistema. A página inicial abre diretamente na lista de postagens.
+Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): paleta teal `#087E8B`, coral `#FF5A5F`, carvão `#3C3C3C`, amarelo `#FFBC42` e lilás `#E2C2FF`, cantos arredondados e layout responsivo, sem sombras ou gradientes. O botão no cabeçalho alterna entre os modos claro e escuro; a escolha fica salva no navegador e, na primeira visita, segue o tema do sistema. A página inicial abre diretamente na lista de postagens.
 
 ## O que já funciona
 
 - Página pública com lista de postagens e estado vazio, sem postagens fictícias.
 - Leitura de textos e fotografias; cada postagem tem um endereço compartilhável com `?post=ID`.
 - Área do autor com uma única conta, sem cadastro público.
-- Publicação de texto simples e até 12 fotos JPEG/PNG, com até 10 MB cada.
+- Publicação e edição em Markdown, com barra de formatação, prévia e até 12 fotos JPEG/PNG, com até 10 MB cada.
+- Fotos inseridas entre os parágrafos na posição do cursor. Postagens antigas mantêm suas fotos.
+- Ícones SVG originais com traços de desenho à mão.
 - Exclusão de postagens com confirmação.
 - Banco H2 em arquivo e imagens em disco, preservados entre reinícios.
 - Login por sessão com cookie HttpOnly, proteção CSRF, senha armazenada em memória como hash BCrypt e validação de uploads. O servidor verifica as permissões em todas as operações de escrita.
+
+## Escrever com Markdown
+
+Na área do autor (`/?autor=1`), abra “Escrever”. Use a barra para inserir negrito, itálico, subtítulos, listas e links. O botão “Prévia” mostra a formatação antes de publicar.
+
+```md
+## Um novo texto
+
+Um parágrafo com **negrito** e _itálico_.
+
+![Descrição da foto](/api/images/arquivo-enviado.png)
+
+Outro parágrafo depois da imagem.
+
+> Uma citação.
+
+- Um item
+- Outro item
+```
+
+Coloque o cursor entre os parágrafos e envie uma foto: a marcação real da imagem será inserida ali. Use “Inserir no texto” para reutilizar uma imagem enviada. Para movê-la, recorte e cole sua linha Markdown. Altere o texto entre colchetes para descrever a imagem. “Remover foto” tira a marcação inserida e a foto da postagem, sem apagar o arquivo do disco. Fotos antigas sem marcação continuam ao final da postagem.
+
+Para revisar uma publicação existente, abra o texto e clique em “Editar postagem”, disponível apenas ao autor autenticado. As alterações preservam a data original. HTML é sanitizado antes da renderização; scripts, eventos e links executáveis não são permitidos. No PowerShell, use `npm.cmd` nos comandos npm.
 
 ## Trabalhar com o Codex e GitHub
 
@@ -43,9 +68,9 @@ Pare o backend antes de recompilar ou substituir seu JAR em execução.
 
 O JAR `backend/target/blog-0.0.1-SNAPSHOT.jar` inclui a compilação Angular e pode servir o site e a API juntos. Compile o frontend antes de empacotar o backend. Para executar, defina a senha e rode `java -jar target/blog-0.0.1-SNAPSHOT.jar` na pasta `backend`.
 
-Os quatro testes de integração da API verificam acesso público, bloqueio de escritas anônimas, login, CSRF, publicação, upload, leitura, exclusão e rejeição de entradas inválidas. O GitHub Actions executa a compilação Angular e `mvn verify`.
+Os quatro testes de integração da API verificam acesso público, bloqueio de escritas anônimas, login, CSRF, publicação, edição, upload, leitura, exclusão e rejeição de entradas inválidas. O GitHub Actions executa a compilação Angular e `mvn verify`.
 
-Os testes de navegador ficam em `frontend/e2e`. Com os dois serviços iniciados, um banco de teste vazio e `BLOG_ADMIN_PASSWORD` configurada no processo de teste, execute `npm run test:e2e` em `frontend`. Usam Chromium em `/usr/bin/chromium`; defina `CHROMIUM_PATH` para outro caminho. Eles publicam e excluem uma postagem de teste, portanto não os execute contra dados de produção. O segundo teste verifica o layout em 375 px. O terceiro verifica o tema do sistema, a alternância claro/escuro e a persistência da preferência ao recarregar.
+Os testes de navegador ficam em `frontend/e2e`. Com os dois serviços iniciados, um banco de teste vazio e `BLOG_ADMIN_PASSWORD` configurada no processo de teste, execute `npm run test:e2e` em `frontend`. Usam Chromium em `/usr/bin/chromium`; defina `CHROMIUM_PATH` para outro caminho. Eles publicam e excluem uma postagem de teste, portanto não os execute contra dados de produção. O segundo teste verifica o layout em 375 px. O terceiro verifica o tema do sistema, a diferença visual claro/escuro e a persistência da preferência. Os demais verificam sanitização do Markdown e compatibilidade de fotos antigas.
 
 ## Dados, senha e hospedagem
 
@@ -59,4 +84,4 @@ Os testes de navegador ficam em `frontend/e2e`. Com os dois serviços iniciados,
 
 Para colocar o blog no ar, ainda é necessário escolher uma hospedagem Java com HTTPS e disco persistente. Configure senha privada, `BLOG_SECURE_COOKIES=true`, `BLOG_DATA_DIR` absoluto e backups. O banco H2 em arquivo atende à primeira versão com uma instância; não compartilhe o arquivo entre várias instâncias. Banco e fotos não são enviados ao GitHub. Faça backup do diretório de dados com a aplicação parada.
 
-Nesta versão não há edição posterior, recuperação de senha por e-mail, editor de texto rico ou armazenamento externo de fotos. A senha é redefinida alterando a variável privada e reiniciando o backend. Fotos removidas do editor ou de uma postagem excluída não são apagadas automaticamente do disco.
+Nesta versão não há recuperação de senha por e-mail, editor visual WYSIWYG ou armazenamento externo de fotos. A senha é redefinida alterando a variável privada e reiniciando o backend. Fotos removidas do editor ou de uma postagem excluída não são apagadas automaticamente do disco.

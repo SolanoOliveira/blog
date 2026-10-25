@@ -49,16 +49,24 @@ class BlogController {
   record Draft(
       @NotBlank @Size(max = 160) String title,
       @NotBlank @Size(max = 100000) String content,
-      @NotNull @Size(max = 12) List<String> images) {}
+      @NotNull @Size(max = 12) List<@NotBlank String> images) {}
 
   @PostMapping("/posts")
   @ResponseStatus(HttpStatus.CREATED)
   Post create(@Valid @RequestBody Draft draft) {
+    return saveDraft(new Post(), draft);
+  }
+
+  @PutMapping("/posts/{id}")
+  Post update(@PathVariable Long id, @Valid @RequestBody Draft draft) {
+    return saveDraft(get(id), draft);
+  }
+
+  private Post saveDraft(Post p, Draft draft) {
     for (String image : draft.images())
       if (!image.matches("/api/images/[a-f0-9-]{36}\\.png")
           || !Files.isRegularFile(uploads.resolve(image.substring(12))))
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Imagem inválida");
-    Post p = new Post();
     p.title = draft.title().strip();
     p.content = draft.content().strip();
     p.images = new ArrayList<>(draft.images());
