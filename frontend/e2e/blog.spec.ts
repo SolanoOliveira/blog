@@ -58,3 +58,25 @@ test('layout móvel sem rolagem horizontal', async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: '/tmp/blog-mobile.png', fullPage: true });
 });
+
+test('tema respeita o sistema, permite alternar e mantém a escolha ao recarregar', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('button', { name: 'Ativar modo claro' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.getByRole('button', { name: 'Ativar modo escuro' }).click();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.getByRole('button', { name: 'Área do autor' })).toHaveCount(0);
+  await page.screenshot({ path: '/tmp/blog-dark-mobile.png', fullPage: true });
+  await page.goto('/?autor=1');
+  await expect(page.getByRole('heading', { name: 'Área do autor' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});

@@ -1,6 +1,6 @@
 # Solano Oliveira — palavras e instantes
 
-Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): fundo branco, tipografia escura, detalhes em azul e layout responsivo, sem sombras ou gradientes. A página inicial abre diretamente na lista de postagens.
+Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): cores pastéis, cantos arredondados e layout responsivo, sem sombras ou gradientes. O botão no cabeçalho alterna entre os modos claro e escuro; a escolha fica salva no navegador e, na primeira visita, segue o tema do sistema. A página inicial abre diretamente na lista de postagens.
 
 ## O que já funciona
 
@@ -45,7 +45,7 @@ O JAR `backend/target/blog-0.0.1-SNAPSHOT.jar` inclui a compilação Angular e p
 
 Os quatro testes de integração da API verificam acesso público, bloqueio de escritas anônimas, login, CSRF, publicação, upload, leitura, exclusão e rejeição de entradas inválidas. O GitHub Actions executa a compilação Angular e `mvn verify`.
 
-Os testes de navegador ficam em `frontend/e2e`. Com os dois serviços iniciados, um banco de teste vazio e `BLOG_ADMIN_PASSWORD` configurada no processo de teste, execute `npm run test:e2e` em `frontend`. Usam Chromium em `/usr/bin/chromium`; defina `CHROMIUM_PATH` para outro caminho. Eles publicam e excluem uma postagem de teste, portanto não os execute contra dados de produção. O segundo teste verifica o layout em 375 px.
+Os testes de navegador ficam em `frontend/e2e`. Com os dois serviços iniciados, um banco de teste vazio e `BLOG_ADMIN_PASSWORD` configurada no processo de teste, execute `npm run test:e2e` em `frontend`. Usam Chromium em `/usr/bin/chromium`; defina `CHROMIUM_PATH` para outro caminho. Eles publicam e excluem uma postagem de teste, portanto não os execute contra dados de produção. O segundo teste verifica o layout em 375 px. O terceiro verifica o tema do sistema, a alternância claro/escuro e a persistência da preferência ao recarregar.
 
 ## Dados, senha e hospedagem
 

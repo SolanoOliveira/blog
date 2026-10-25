@@ -18,6 +18,17 @@ interface Post {
 })
 export class App {
   private http = inject(HttpClient);
+  darkMode = signal(document.documentElement.dataset['theme'] === 'dark');
+  toggleTheme() {
+    const theme = this.darkMode() ? 'light' : 'dark';
+    this.darkMode.set(theme === 'dark');
+    document.documentElement.dataset['theme'] = theme;
+    try {
+      localStorage.setItem('solano-theme', theme);
+    } catch {
+      /* Theme works when storage is unavailable. */
+    }
+  }
   posts = signal<Post[]>([]);
   selected = signal<Post | null>(null);
   admin = signal(false);

@@ -1,12 +1,12 @@
 ---
 version: "alpha"
-name: "Flat Design"
-description: "Blog minimalista, 2D, com foco nas postagens e na tipografia."
+name: "Blog Pastel"
+description: "Blog minimalista em tons pastéis, cantos arredondados e temas claro e escuro."
 colors:
-  primary: "#1A1A1A"
-  secondary: "#4A4A4A"
-  tertiary: "#0066FF"
-  neutral: "#FFFFFF"
+  primary: "#303B3B"
+  secondary: "#596666"
+  tertiary: "#D6E8DF"
+  neutral: "#FBF9F6"
 typography:
   h1:
     fontFamily: System UI stack
@@ -21,14 +21,16 @@ typography:
     fontSize: 0.75rem
     fontWeight: 500
 rounded:
-  sm: 2px
-  md: 4px
-  lg: 8px
+  sm: 10px
+  md: 16px
+  lg: 24px
 ---
 
 ## Direção visual
 
-Referência atualizada a partir do Flat Design fornecido pelo autor. Fundo branco, texto em carvão, texto secundário cinza e azul para ações. Tipografia do sistema, linhas simples, sem sombras, gradientes ou ilustrações decorativas. Usar até 4–6 cores sólidas e cantos discretos de 0–2 px.
+Referência atualizada pelo pedido mais recente do autor: manter a estrutura simples, com tons pastéis e cantos mais arredondados. Tema claro em creme, branco e verde-sálvia suave; texto escuro para preservar contraste. Tema escuro em carvão azulado, superfícies suaves e detalhes em verde pastel. Sem sombras ou gradientes.
+
+Botões e campos com raio de 16px; cartões e estados vazios com 24px; controle de tema circular. O botão no cabeçalho permite alternar claro/escuro. A preferência é salva no navegador e aplicada antes da inicialização do Angular. Na primeira visita, respeitar a preferência do sistema. O controle deve continuar funcionando quando o armazenamento local estiver indisponível.
 
 ## Página inicial
 
@@ -46,8 +48,8 @@ Essa escolha segue o pedido explícito de simplificar o blog, substituindo o her
 
 ## Componentes e acessibilidade
 
-- Botões primários azuis com texto branco; hover com mudança de cor, sem sombras.
-- Campos com rótulos acima e borda simples. Foco visível com contorno azul e afastamento de 2–4px.
+- Botões primários em verde pastel com texto escuro; hover com mudança de cor, sem sombras.
+- Campos com rótulos acima e borda simples. Foco visível com contorno contrastante e afastamento de 2–4px.
 - Ícones SVG quando necessários, sem emojis.
 - Estado vazio com ícone e mensagem curta. Ação de escrever somente para administrador autenticado.
 - Carregamento por bloco neutro com mudança de opacidade, sem gradiente ou spinner.
