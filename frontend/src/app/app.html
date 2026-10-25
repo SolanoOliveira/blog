@@ -1,0 +1,329 @@
+<header class="header">
+  <a class="brand" href="/" (click)="$event.preventDefault(); home()"
+    ><span class="brand-mark" aria-hidden="true">so<span></span></span
+    ><span>Solano Oliveira<span class="brand-sub">UM BLOG PESSOAL</span></span></a
+  >
+  <nav aria-label="Principal">
+    <button class="nav-link" (click)="home()">Textos</button>
+    @if (admin()) {
+      <button class="button small" (click)="editor()">Escrever</button
+      ><button class="nav-link" (click)="logout()">Sair</button>
+    } @else {
+      <button class="nav-link author-link" (click)="loginView()">
+        Área do autor
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <path d="M6 18 18 6M6 6h12v12" />
+        </svg>
+      </button>
+    }
+  </nav>
+</header>
+<main id="main">
+  @if (error()) {
+    <div class="message error" role="alert">
+      {{ error() }}
+      <button class="text-button" (click)="error.set('')" aria-label="Fechar mensagem">×</button>
+    </div>
+  }
+  @if (notice()) {
+    <div class="message success" role="status">{{ notice() }}</div>
+  }
+  @if (view() === 'login') {
+    <section class="login panel">
+      <span class="eyebrow">UM ESPAÇO SÓ SEU</span>
+      <h1>Olá de novo,<br />Solano.</h1>
+      <p class="muted">Entre para compartilhar um novo texto.</p>
+      <form (ngSubmit)="login()">
+        <label for="username">Usuário</label
+        ><input
+          id="username"
+          name="username"
+          [(ngModel)]="username"
+          autocomplete="username"
+          required
+        /><label for="password">Senha</label
+        ><input
+          id="password"
+          name="password"
+          type="password"
+          [(ngModel)]="password"
+          autocomplete="current-password"
+          required
+        /><button class="button" [disabled]="busy()">
+          {{ busy() ? 'Entrando…' : 'Entrar na área do autor' }} <span aria-hidden="true">→</span>
+        </button>
+      </form>
+      <button class="text-button" (click)="home()">← Voltar para os textos</button>
+    </section>
+  } @else if (view() === 'editor' && admin()) {
+    <section class="editor">
+      <button class="text-button" (click)="home()">← Voltar para o blog</button
+      ><span class="eyebrow">ÁREA DO AUTOR</span>
+      <h1>Uma nova história.</h1>
+      <p class="muted">Escreva no seu tempo. Compartilhe quando estiver pronto.</p>
+      <form (ngSubmit)="publish()">
+        <label for="title">Título</label
+        ><input
+          id="title"
+          name="title"
+          [(ngModel)]="title"
+          maxlength="160"
+          placeholder="Dê um nome ao seu texto"
+          required
+        /><label for="content">Seu texto</label
+        ><textarea
+          id="content"
+          name="content"
+          [(ngModel)]="content"
+          maxlength="100000"
+          rows="14"
+          placeholder="O que você gostaria de contar?"
+          required
+        ></textarea
+        ><label for="photos">Fotos <span class="muted">· opcional</span></label>
+        <div class="upload">
+          <input
+            id="photos"
+            type="file"
+            accept="image/jpeg,image/png"
+            multiple
+            (change)="upload($event)"
+            [disabled]="busy()"
+          />
+          <p class="muted">JPEG ou PNG · até 10 MB por foto · máximo de 12 fotos</p>
+        </div>
+        <div class="photo-grid">
+          @for (image of images(); track image) {
+            <figure>
+              <img [src]="image" alt="Foto selecionada para a postagem" /><button
+                type="button"
+                class="remove-photo"
+                (click)="removeImage(image)"
+                aria-label="Remover foto"
+              >
+                ×
+              </button>
+            </figure>
+          }
+        </div>
+        <div class="editor-actions">
+          <span class="muted">A postagem ficará visível para todos.</span
+          ><button class="button" [disabled]="busy() || !title.trim() || !content.trim()">
+            {{ busy() ? 'Preparando…' : 'Publicar texto' }}
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <path d="M6 18 18 6M6 6h12v12" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </section>
+  } @else if (selected(); as post) {
+    <article class="reading">
+      <button class="text-button" (click)="home()">← Todos os textos</button>
+      <div class="post-meta">
+        <span>POR SOLANO OLIVEIRA</span><span>{{ post.createdAt | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <h1>{{ post.title }}</h1>
+      <div class="reading-line"></div>
+      <p class="post-body">{{ post.content }}</p>
+      <div class="article-images">
+        @for (image of post.images; track image; let i = $index) {
+          <img
+            [src]="image"
+            [alt]="'Foto ' + (i + 1) + ' da postagem ' + post.title"
+            loading="lazy"
+          />
+        }
+      </div>
+      <footer class="article-footer">
+        <div class="author-avatar" aria-hidden="true">SO</div>
+        <div>
+          <strong>Solano Oliveira</strong>
+          <p class="muted">Textos, fotografias e um pouco do caminho.</p>
+        </div>
+        @if (admin()) {
+          <button class="text-button danger" (click)="remove(post)" [disabled]="busy()">
+            Excluir postagem
+          </button>
+        }
+      </footer>
+    </article>
+  } @else {
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span> UM LUGAR PARA COMPARTILHAR</span>
+        <h1>Entre palavras<br />e <span>instantes.</span></h1>
+        <p>
+          Um espaço para guardar ideias, contar histórias e compartilhar o que faz parte do meu
+          caminho.
+        </p>
+        <a class="button" href="#textos">Explore os textos <span aria-hidden="true">↓</span></a>
+        <div class="hero-signature"><span class="signature-line"></span> Por Solano Oliveira</div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="art-orbit"></div>
+        <div class="art-sun"></div>
+        <div class="art-frame">
+          <svg viewBox="0 0 380 420" fill="none">
+            <rect width="380" height="420" fill="#e6eff0" />
+            <circle cx="272" cy="112" r="46" fill="#f4d9b5" />
+            <path d="M0 265Q90 155 180 252T380 230V420H0Z" fill="#a8bdb0" />
+            <path d="M0 338Q112 215 230 310T380 288V420H0Z" fill="#6e8a7b" />
+            <path d="M150 420Q245 310 180 275Q248 305 221 420" fill="#e6e7d8" />
+          </svg>
+          <div class="art-caption">
+            <span>PEQUENAS PAUSAS, NOVOS OLHARES</span><span>01 / ∞</span>
+          </div>
+        </div>
+        <div class="art-note">
+          <span class="note-icon"
+            ><svg
+              viewBox="0 0 48 48"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M24 5v38M5 24h38M10.5 10.5l27 27M10.5 37.5l27-27" /></svg></span
+          ><span>Há histórias nas<br />coisas simples.</span>
+        </div>
+        <span class="art-side">UM REGISTRO DO COTIDIANO</span>
+      </div>
+    </section>
+    <section class="posts-section" id="textos">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">O QUE ANDO COMPARTILHANDO</span>
+          <h2>Últimos textos<span class="pink-dot">.</span></h2>
+        </div>
+        <span class="post-count"
+          >{{ posts().length }} {{ posts().length === 1 ? 'publicação' : 'publicações' }}</span
+        >
+      </div>
+      @if (loading()) {
+        <div class="skeleton" role="status" aria-label="Carregando postagens"></div>
+      } @else if (posts().length === 0) {
+        <div class="empty">
+          <svg
+            width="42"
+            height="42"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.2"
+            aria-hidden="true"
+          >
+            <path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h5" />
+          </svg>
+          <h3>As primeiras palavras estão por vir.</h3>
+          <p>Este espaço está começando. Em breve, novas histórias por aqui.</p>
+          @if (admin()) {
+            <button class="button" (click)="editor()">
+              Escrever a primeira postagem
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M6 18 18 6M6 6h12v12" />
+              </svg>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="posts-list">
+          @for (post of posts(); track post.id; let i = $index) {
+            <article class="post-card">
+              <button
+                class="post-cover"
+                (click)="open(post)"
+                [attr.aria-label]="'Ler ' + post.title"
+              >
+                @if (post.images.length) {
+                  <img
+                    [src]="post.images[0]"
+                    [alt]="'Foto da postagem ' + post.title"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="typographic-cover" [class.rose]="i % 2 === 1">
+                    <span>S / O</span><span class="cover-word">palavras<br />& instantes.</span
+                    ><span>UM REGISTRO PESSOAL</span>
+                  </div>
+                }
+              </button>
+              <div class="post-info">
+                <div class="post-meta">
+                  <span>NOTAS DO COTIDIANO</span
+                  ><time>{{ post.createdAt | date: 'dd/MM/yyyy' }}</time>
+                </div>
+                <h3>
+                  <button (click)="open(post)">{{ post.title }}</button>
+                </h3>
+                <p class="excerpt">{{ post.content }}</p>
+                <button class="read-link" (click)="open(post)">
+                  Ler o texto
+                  <svg
+                    class="icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 18 18 6M6 6h12v12" />
+                  </svg>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+    <aside class="about">
+      <div class="author-avatar" aria-hidden="true">SO</div>
+      <div>
+        <span class="eyebrow">QUEM ESCREVE</span>
+        <h2>Prazer, Solano.</h2>
+        <p>
+          Este é meu cantinho na internet. Um lugar para dividir pensamentos, fotografias e
+          histórias que merecem ficar.
+        </p>
+      </div>
+      <span class="about-flower" aria-hidden="true"
+        ><svg
+          viewBox="0 0 48 48"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M24 5v38M5 24h38M10.5 10.5l27 27M10.5 37.5l27-27" /></svg
+      ></span>
+    </aside>
+  }
+</main>
+<footer class="site-footer">
+  <a href="/" (click)="$event.preventDefault(); home()"
+    >Solano Oliveira<span class="pink-dot">.</span></a
+  ><span>Feito de palavras, imagens e tempo.</span><span>© {{ 2026 }} Solano Oliveira</span>
+</footer>
