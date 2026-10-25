@@ -7,20 +7,6 @@
     @if (admin()) {
       <button class="button small" (click)="editor()">Escrever</button
       ><button class="nav-link" (click)="logout()">Sair</button>
-    } @else {
-      <button class="nav-link author-link" (click)="loginView()">
-        Área do autor
-        <svg
-          class="icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          aria-hidden="true"
-        >
-          <path d="M6 18 18 6M6 6h12v12" />
-        </svg>
-      </button>
     }
   </nav>
 </header>

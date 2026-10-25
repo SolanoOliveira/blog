@@ -51,7 +51,7 @@ export class App {
   restoreLocation() {
     const id = new URLSearchParams(location.search).get('post');
     this.selected.set(this.posts().find((p) => String(p.id) === id) || null);
-    this.view.set('home');
+    this.view.set(new URLSearchParams(location.search).get('autor') === '1' ? 'login' : 'home');
   }
   home() {
     history.pushState({}, '', location.pathname);

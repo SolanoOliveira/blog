@@ -25,7 +25,7 @@ Pré-requisitos: Node.js 24, npm, JDK 21 completo e Maven 3.9+. Não basta insta
 3. Na pasta `backend`, execute `mvn spring-boot:run`.
 4. Em outro terminal, na pasta `frontend`, execute `npm start`.
 
-O Angular usa a porta 4200 e encaminha `/api` para o backend na porta 8080. O botão “Área do autor” abre o login. Visitantes podem ler sem entrar.
+O Angular usa a porta 4200 e encaminha `/api` para o backend na porta 8080. O login não aparece na navegação pública. Para entrar como autor, acrescente `/?autor=1` ao endereço do blog (no desenvolvimento, digite `localhost:4200/?autor=1` no navegador). Esse endereço discreto não substitui a autenticação: publicar continua exigindo senha. Visitantes podem ler sem entrar.
 
 No ambiente de nuvem, `bash scripts/cloud-setup.sh` instala as ferramentas em `/workspace`, configura o proxy Maven existente, instala as dependências e valida o projeto. Depois de definir a senha, `bash scripts/cloud-backend.sh` inicia o backend já compilado. Use o checkout existente; cada tarefa já é isolada, não é necessário criar um worktree.
 

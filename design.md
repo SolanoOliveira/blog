@@ -32,7 +32,7 @@ Referência atualizada a partir do Flat Design fornecido pelo autor. Fundo branc
 
 ## Página inicial
 
-Abrir diretamente na lista pública de postagens. Sem hero, página de apresentação ou seção “sobre”. Cabeçalho com Solano Oliveira e acesso discreto à área do autor. Título “Postagens”, quantidade de publicações e lista cronológica. Cada item mostra data, título, resumo e foto somente quando a postagem tiver uma. Não criar capas fictícias para textos sem foto.
+Abrir diretamente na lista pública de postagens. Sem hero, página de apresentação ou seção “sobre”. Cabeçalho com Solano Oliveira, sem link público para a área do autor. Login acessível pelo endereço `/?autor=1`, sempre protegido por senha. Título “Postagens”, quantidade de publicações e lista cronológica. Cada item mostra data, título, resumo e foto somente quando a postagem tiver uma. Não criar capas fictícias para textos sem foto.
 
 Essa escolha segue o pedido explícito de simplificar o blog, substituindo o hero e as seções de landing page do template geral.
 
