@@ -1,0 +1,26 @@
+name: Verificar blog
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Instalar frontend
+        working-directory: frontend
+        run: npm ci
+      - name: Compilar Angular
+        working-directory: frontend
+        run: npm run build
+      - name: Testar API e empacotar aplicação
+        working-directory: backend
+        run: mvn --batch-mode verify
