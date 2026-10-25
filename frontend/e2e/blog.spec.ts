@@ -94,11 +94,19 @@ test('tema respeita o sistema, permite alternar e mantém a escolha ao recarrega
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('button', { name: 'Ativar modo claro' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   const darkBackground = await page
     .locator('html')
     .evaluate((el) => getComputedStyle(el).backgroundColor);
   await page.getByRole('button', { name: 'Ativar modo claro' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.getByRole('button', { name: 'Ativar modo escuro' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
   const lightBackground = await page
     .locator('html')
     .evaluate((el) => getComputedStyle(el).backgroundColor);

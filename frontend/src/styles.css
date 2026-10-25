@@ -559,30 +559,6 @@ input[type='file'] {
   }
 }
 
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 8px 14px;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  color: var(--accent);
-  background: var(--soft);
-  transition: background-color 0.15s;
-}
-.theme-toggle:hover {
-  background: var(--button);
-  color: var(--button-text);
-}
-.theme-toggle svg {
-  width: 19px;
-  height: 19px;
-}
 .post-count {
   background: var(--soft);
   border-radius: 999px;
@@ -826,9 +802,6 @@ input[type='file']::file-selector-button {
   .markdown-toolbar .preview-toggle {
     margin-left: 0;
   }
-  .theme-toggle {
-    padding: 8px 10px;
-  }
   .editor-preview {
     padding: 18px;
   }
@@ -844,13 +817,6 @@ input[type='file']::file-selector-button {
   display: flex;
   align-items: center;
   gap: 18px;
-}
-.theme-toggle {
-  width: 40px;
-  min-height: 40px;
-  padding: 9px;
-  border-radius: 50%;
-  background: transparent;
 }
 :root[data-theme='dark'] .header {
   border: 0;
@@ -1071,5 +1037,76 @@ input[type='file']::file-selector-button {
   #main > section,
   #main > article {
     animation: none;
+  }
+}
+
+/* A tiny hand-drawn day/night switch, using Solano's amber and lilac. */
+.theme-toggle {
+  position: relative;
+  isolation: isolate;
+  width: 88px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 2px solid var(--border);
+  border-radius: 26px 24px 27px 23px;
+  background: var(--soft);
+  color: var(--charcoal);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.25s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--coral);
+}
+.theme-disc {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 46% 48% 45%;
+  background: var(--amber);
+  transform: translateX(0) rotate(-8deg);
+  transition:
+    transform 0.36s cubic-bezier(0.22, 0.85, 0.3, 1),
+    background-color 0.25s ease;
+}
+.theme-toggle app-sketch-icon {
+  position: absolute;
+  top: 10px;
+  width: 24px;
+  height: 24px;
+  transition:
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+.theme-sun {
+  left: 10px;
+  color: var(--charcoal);
+}
+.theme-moon {
+  right: 10px;
+  color: var(--accent);
+  opacity: 0.65;
+}
+.is-night .theme-disc {
+  transform: translateX(40px) rotate(8deg);
+  background: var(--lilac);
+}
+.is-night .theme-sun {
+  color: var(--amber);
+  opacity: 0.6;
+}
+.is-night .theme-moon {
+  color: var(--charcoal);
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-disc,
+  .theme-toggle,
+  .theme-toggle app-sketch-icon {
+    transition: none;
   }
 }

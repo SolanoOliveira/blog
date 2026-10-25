@@ -33,7 +33,7 @@ Paleta solicitada pelo autor: teal nas ações do modo claro; coral nos detalhes
 
 O tema claro tem fundo quase branco `#FFFDFA`, superfícies brancas e texto carvão. O escuro tem fundo `#1E1C21`, superfícies carvão `#3C3C3C` e texto claro. Os temas devem ser visualmente distintos, incluindo formulários, prévia, código e leitura de postagens.
 
-Botões e campos com raio de 16px; cartões e estados vazios com 24px. Controle discreto no topo com ícone e rótulo acessível indicando a troca de tema. Preferência salva no navegador e aplicada antes da inicialização do Angular; na primeira visita seguir o sistema. Continuar funcionando sem armazenamento local.
+Botões e campos com raio de 16px; cartões e estados vazios com 24px. Controle deslizante no topo, com sol e lua em traços próprios de caneta. Indicador amarelo para claro e lilás para escuro, com deslocamento suave. Rótulo acessível indica a ação e aria-pressed informa se o modo escuro está ativo. Preferência salva no navegador e aplicada antes da inicialização do Angular; na primeira visita seguir o sistema. Continuar funcionando sem armazenamento local.
 
 Ícones SVG originais com traços levemente irregulares, como desenhos de caneta: sol, lua, documento, imagem, olho, caneta e setas. Sem emojis, dependências de fontes de ícones ou filtros artificiais sobre os textos. Sem gradientes ou sombras pesadas; o botão e o painel flutuantes usam uma sombra discreta, conforme a referência do autor.
 

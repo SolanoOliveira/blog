@@ -3,11 +3,15 @@
     <button
       type="button"
       class="theme-toggle"
+      [class.is-night]="darkMode()"
+      [attr.aria-pressed]="darkMode()"
       (click)="toggleTheme()"
       [attr.aria-label]="darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'"
       [attr.title]="darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'"
     >
-      <app-sketch-icon [name]="darkMode() ? 'sun' : 'moon'" />
+      <span class="theme-disc" aria-hidden="true"></span>
+      <app-sketch-icon class="theme-sun" name="sun" />
+      <app-sketch-icon class="theme-moon" name="moon" />
     </button>
     @if (admin()) {
       <button class="button small" (click)="newPost()">
