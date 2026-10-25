@@ -224,6 +224,13 @@ test('menu móvel permanece acessível nos dois temas e respeita movimento reduz
     await page.locator('.menu-panel').evaluate((el) => getComputedStyle(el).transitionDuration),
   ).toBe('0s');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const buttonBounds = await page
+    .getByRole('button', { name: 'Fechar menu', exact: true })
+    .boundingBox();
+  const panelBounds = await page.locator('.menu-panel').boundingBox();
+  expect(buttonBounds!.y).toBeLessThan(64);
+  expect(buttonBounds!.x).toBeLessThan(64);
+  expect(panelBounds!.y).toBeGreaterThanOrEqual(buttonBounds!.y + buttonBounds!.height);
   await page.screenshot({ path: '/tmp/blog-floating-menu-light.png', fullPage: true });
   await page.getByRole('button', { name: 'Ativar modo escuro' }).click();
   await expect(page.getByRole('button', { name: 'Abrir menu', exact: true })).toHaveAttribute(
