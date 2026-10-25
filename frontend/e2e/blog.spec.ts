@@ -172,3 +172,67 @@ test('fotos Markdown com legenda não duplicam e fotos antigas continuam visíve
     '/api/images/legacy.png',
   );
 });
+
+test('menu flutuante contém só postagens e sobre, navega e responde ao teclado', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const toggle = page.getByRole('button', { name: 'Abrir menu', exact: true });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('navigation', { name: 'Principal' })).toHaveCount(0);
+  await toggle.click();
+  const nav = page.getByRole('navigation', { name: 'Principal' });
+  await expect(nav.getByRole('link')).toHaveCount(2);
+  await expect(nav.getByRole('link', { name: 'Postagens', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(nav.getByRole('link', { name: 'Sobre o autor', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { name: 'Sobre o autor', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/pagina=sobre/);
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Sobre o autor', exact: true })).toBeVisible();
+  await toggle.click();
+  await expect(nav.getByRole('link', { name: 'Sobre o autor', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await page.keyboard.press('Escape');
+  await expect(toggle).toBeFocused();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.click();
+  await nav.getByRole('link', { name: 'Postagens', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Postagens', exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Sobre o autor', exact: true })).toBeVisible();
+  await toggle.click();
+  await page.getByRole('heading', { name: 'Sobre o autor', exact: true }).click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('menu móvel permanece acessível nos dois temas e respeita movimento reduzido', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Abrir menu', exact: true }).click();
+  await expect(page.getByRole('navigation', { name: 'Principal' }).getByRole('link')).toHaveCount(
+    2,
+  );
+  expect(
+    await page.locator('.menu-panel').evaluate((el) => getComputedStyle(el).transitionDuration),
+  ).toBe('0s');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '/tmp/blog-floating-menu-light.png', fullPage: true });
+  await page.getByRole('button', { name: 'Ativar modo escuro' }).click();
+  await expect(page.getByRole('button', { name: 'Abrir menu', exact: true })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  );
+  await page.getByRole('button', { name: 'Abrir menu', exact: true }).click();
+  await page.screenshot({ path: '/tmp/blog-floating-menu-dark.png', fullPage: true });
+  await page.getByRole('link', { name: 'Sobre o autor', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Sobre o autor', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Área do autor', exact: true })).toHaveCount(0);
+});

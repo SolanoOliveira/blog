@@ -1,6 +1,6 @@
 # Solano Oliveira — palavras e instantes
 
-Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): paleta teal `#087E8B`, coral `#FF5A5F`, carvão `#3C3C3C`, amarelo `#FFBC42` e lilás `#E2C2FF`, cantos arredondados e layout responsivo, sem sombras ou gradientes. O botão no cabeçalho alterna entre os modos claro e escuro; a escolha fica salva no navegador e, na primeira visita, segue o tema do sistema. A página inicial abre diretamente na lista de postagens.
+Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): paleta teal `#087E8B`, coral `#FF5A5F`, carvão `#3C3C3C`, amarelo `#FFBC42` e lilás `#E2C2FF`, cantos arredondados e layout responsivo, sem sombras ou gradientes. O botão no cabeçalho alterna entre os modos claro e escuro; a escolha fica salva no navegador e, na primeira visita, segue o tema do sistema. A página inicial abre diretamente na lista de postagens, com topo reduzido ao controle de tema. Um botão hambúrguer circular flutua no canto inferior direito e abre somente “Postagens” e “Sobre o autor”.
 
 ## O que já funciona
 
@@ -13,6 +13,10 @@ Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual s
 - Exclusão de postagens com confirmação.
 - Banco H2 em arquivo e imagens em disco, preservados entre reinícios.
 - Login por sessão com cookie HttpOnly, proteção CSRF, senha armazenada em memória como hash BCrypt e validação de uploads. O servidor verifica as permissões em todas as operações de escrita.
+
+## Navegação pública
+
+O menu flutuante abre com animação suave e transforma o hambúrguer em um X. Há apenas duas opções: “Postagens” e “Sobre o autor”. A página do autor é separada e pode ser aberta diretamente com `?pagina=sobre`. Feche pelo botão, clicando fora ou pressionando Escape. Os links funcionam por teclado, e as animações respeitam movimento reduzido. O controle de tema permanece separado no topo; o acesso administrativo continua exclusivamente em `?autor=1`.
 
 ## Escrever com Markdown
 

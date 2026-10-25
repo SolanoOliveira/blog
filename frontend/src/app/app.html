@@ -1,9 +1,5 @@
 <header class="header">
-  <a class="brand" href="/" (click)="$event.preventDefault(); home()"
-    ><span>Solano Oliveira</span></a
-  >
-  <nav aria-label="Principal">
-    <button class="nav-link" (click)="home()">Textos</button>
+  <div class="header-actions">
     <button
       type="button"
       class="theme-toggle"
@@ -12,14 +8,13 @@
       [attr.title]="darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'"
     >
       <app-sketch-icon [name]="darkMode() ? 'sun' : 'moon'" />
-      <span>{{ darkMode() ? 'Claro' : 'Escuro' }}</span>
     </button>
     @if (admin()) {
       <button class="button small" (click)="newPost()">
         <app-sketch-icon name="pen" /> Escrever</button
       ><button class="nav-link" (click)="logout()">Sair</button>
     }
-  </nav>
+  </div>
 </header>
 <main id="main">
   @if (error()) {
@@ -33,7 +28,16 @@
   @if (notice()) {
     <div class="message success" role="status">{{ notice() }}</div>
   }
-  @if (view() === 'login') {
+  @if (view() === 'about') {
+    <section class="about-page page-content" aria-labelledby="about-heading">
+      <h1 id="about-heading">Sobre o autor</h1>
+      <div class="author-intro">
+        <h2>Solano Oliveira</h2>
+        <p>Este é meu espaço para compartilhar textos, fotografias e ideias.</p>
+        <p>Um registro pessoal do que observo, penso e quero guardar.</p>
+      </div>
+    </section>
+  } @else if (view() === 'login') {
     <section class="login panel">
       <h1>Área do autor</h1>
       <p class="muted">Entre para compartilhar um novo texto.</p>
@@ -246,15 +250,11 @@
         <div>
           <h1>Postagens</h1>
         </div>
-        <span class="post-count"
-          >{{ posts().length }} {{ posts().length === 1 ? 'publicação' : 'publicações' }}</span
-        >
       </div>
       @if (loading()) {
         <div class="skeleton" role="status" aria-label="Carregando postagens"></div>
       } @else if (posts().length === 0) {
         <div class="empty">
-          <app-sketch-icon class="empty-icon" name="page" />
           <h3>Nenhuma postagem ainda.</h3>
           <p>As novas postagens aparecerão aqui.</p>
           @if (admin()) {
@@ -302,6 +302,38 @@
   }
 </main>
 <footer class="site-footer">
-  <a href="/" (click)="$event.preventDefault(); home()">Solano Oliveira</a
-  ><span>© {{ 2026 }} Solano Oliveira</span>
+  <span>© {{ 2026 }} Solano Oliveira</span>
 </footer>
+<div #menuRoot class="floating-menu" [class.is-open]="menuOpen()">
+  <div id="site-menu" class="menu-panel" [inert]="!menuOpen()" [attr.aria-hidden]="!menuOpen()">
+    <nav class="floating-nav" aria-label="Principal">
+      <a
+        href="/"
+        (click)="$event.preventDefault(); navigate('home')"
+        [attr.aria-current]="view() === 'home' ? 'page' : null"
+      >
+        <app-sketch-icon name="page" /><span>Postagens</span
+        ><app-sketch-icon class="menu-arrow" name="arrow" />
+      </a>
+      <a
+        href="/?pagina=sobre"
+        (click)="$event.preventDefault(); navigate('about')"
+        [attr.aria-current]="view() === 'about' ? 'page' : null"
+      >
+        <app-sketch-icon name="pen" /><span>Sobre o autor</span
+        ><app-sketch-icon class="menu-arrow" name="arrow" />
+      </a>
+    </nav>
+  </div>
+  <button
+    #menuToggle
+    class="hamburger"
+    type="button"
+    (click)="toggleMenu()"
+    [attr.aria-expanded]="menuOpen()"
+    aria-controls="site-menu"
+    [attr.aria-label]="menuOpen() ? 'Fechar menu' : 'Abrir menu'"
+  >
+    <span class="hamburger-lines" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+</div>

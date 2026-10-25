@@ -1,4 +1,14 @@
-import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  HostListener,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +31,7 @@ interface Post {
 })
 export class App {
   private http = inject(HttpClient);
+  private injector = inject(Injector);
   darkMode = signal(document.documentElement.dataset['theme'] === 'dark');
   toggleTheme() {
     const theme = this.darkMode() ? 'light' : 'dark';
@@ -35,7 +46,62 @@ export class App {
   posts = signal<Post[]>([]);
   selected = signal<Post | null>(null);
   admin = signal(false);
-  view = signal<'home' | 'login' | 'editor'>('home');
+  view = signal<'home' | 'about' | 'login' | 'editor'>('home');
+  menuOpen = signal(false);
+  @ViewChild('menuRoot') menuRoot?: ElementRef<HTMLElement>;
+  @ViewChild('menuToggle') menuToggle?: ElementRef<HTMLButtonElement>;
+  toggleMenu() {
+    if (this.menuOpen()) {
+      this.closeMenu();
+      return;
+    }
+    this.menuOpen.set(true);
+    afterNextRender(
+      () => {
+        if (this.menuOpen())
+          this.menuRoot?.nativeElement.querySelector<HTMLAnchorElement>('nav a')?.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+  closeMenu(restoreFocus = true) {
+    this.menuOpen.set(false);
+    if (restoreFocus) this.menuToggle?.nativeElement.focus();
+  }
+  @HostListener('document:keydown.escape') dismissWithEscape() {
+    if (this.menuOpen()) this.closeMenu();
+  }
+  @HostListener('document:click', ['$event']) dismissOutside(event: MouseEvent) {
+    if (
+      this.menuOpen() &&
+      event.target instanceof Node &&
+      !this.menuRoot?.nativeElement.contains(event.target)
+    )
+      this.closeMenu(false);
+  }
+  navigate(page: 'home' | 'about') {
+    this.closeMenu(false);
+    this.selected.set(null);
+    this.error.set('');
+    this.notice.set('');
+    const target = new URL(page === 'about' ? '?pagina=sobre' : location.pathname, location.href);
+    if (target.href !== location.href) history.pushState({}, '', target.pathname + target.search);
+    this.view.set(page);
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    });
+    afterNextRender(
+      () => {
+        const heading = document.querySelector<HTMLElement>('#main h1');
+        heading?.setAttribute('tabindex', '-1');
+        heading?.focus({ preventScroll: true });
+      },
+      { injector: this.injector },
+    );
+  }
   loading = signal(true);
   busy = signal(false);
   error = signal('');
@@ -117,9 +183,14 @@ export class App {
   restoreLocation() {
     const id = new URLSearchParams(location.search).get('post');
     this.selected.set(this.posts().find((p) => String(p.id) === id) || null);
-    this.view.set(new URLSearchParams(location.search).get('autor') === '1' ? 'login' : 'home');
+    const params = new URLSearchParams(location.search);
+    this.view.set(
+      params.get('autor') === '1' ? 'login' : params.get('pagina') === 'sobre' ? 'about' : 'home',
+    );
+    this.closeMenu(false);
   }
   home() {
+    this.closeMenu(false);
     history.pushState({}, '', location.pathname);
     this.selected.set(null);
     this.view.set('home');
@@ -127,6 +198,7 @@ export class App {
     this.notice.set('');
   }
   open(post: Post) {
+    this.closeMenu(false);
     history.pushState({}, '', '?post=' + post.id);
     this.selected.set(post);
     this.view.set('home');
