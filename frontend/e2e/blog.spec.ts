@@ -1,10 +1,8 @@
 import { test, expect } from '@playwright/test';
 test('visitante lê; autor publica texto e foto; sessão encerra', async ({ page, browser }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Entre palavras e instantes.' })).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'As primeiras palavras estão por vir.' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Postagens', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nenhuma postagem ainda.' })).toBeVisible();
   await page.screenshot({ path: '/tmp/blog-desktop.png', fullPage: true });
   await page.getByRole('button', { name: 'Área do autor' }).click();
   await page.getByLabel('Senha').fill('senha-incorreta');
@@ -40,19 +38,21 @@ test('visitante lê; autor publica texto e foto; sessão encerra', async ({ page
   await expect(
     visitor.getByRole('img', { name: 'Foto 1 da postagem Uma pausa no caminho' }),
   ).toBeVisible();
+  await visitor.goto('/');
+  await expect(visitor.getByRole('heading', { name: 'Postagens', exact: true })).toBeVisible();
+  await expect(visitor.getByRole('heading', { name: 'Uma pausa no caminho' })).toBeVisible();
+  await expect(visitor.getByRole('button', { name: 'Escrever', exact: true })).toHaveCount(0);
   await context.close();
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Excluir postagem' }).click();
-  await expect(
-    page.getByRole('heading', { name: 'As primeiras palavras estão por vir.' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nenhuma postagem ainda.' })).toBeVisible();
   await page.getByRole('button', { name: 'Sair', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Área do autor' })).toBeVisible();
 });
 test('layout móvel sem rolagem horizontal', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Entre palavras e instantes.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Postagens', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: '/tmp/blog-mobile.png', fullPage: true });
 });

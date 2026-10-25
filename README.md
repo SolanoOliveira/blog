@@ -1,6 +1,6 @@
 # Solano Oliveira — palavras e instantes
 
-Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): cores suaves, cantos arredondados, sombras discretas e layout responsivo. Textos usam cores escuras para garantir contraste.
+Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual segue o [design.md](design.md): fundo branco, tipografia escura, detalhes em azul e layout responsivo, sem sombras ou gradientes. A página inicial abre diretamente na lista de postagens.
 
 ## O que já funciona
 
