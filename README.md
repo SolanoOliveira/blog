@@ -16,7 +16,7 @@ Blog pessoal minimalista, com Angular 21 e Java 21 / Spring Boot 3.5. O visual s
 
 ## Navegação pública
 
-O menu flutuante abre com animação suave e transforma o hambúrguer em um X. Há apenas duas opções: “Postagens” e “Sobre o autor”. A página do autor é separada e pode ser aberta diretamente com `?pagina=sobre`. Feche pelo botão, clicando fora ou pressionando Escape. Os links funcionam por teclado, e as animações respeitam movimento reduzido. O controle de tema permanece separado no topo; o acesso administrativo continua exclusivamente em `?autor=1`.
+O menu flutuante abre com animação suave e mantém o ícone de três linhas, inclusive quando aberto. Há apenas duas opções: “Postagens” e “Sobre o autor”. A página do autor é separada e pode ser aberta diretamente com `?pagina=sobre`. Feche pelo botão, clicando fora ou pressionando Escape. Os links funcionam por teclado, e as animações respeitam movimento reduzido. O controle de tema permanece separado no topo; o acesso administrativo continua exclusivamente em `?autor=1`.
 
 ## Escrever com Markdown
 

@@ -920,16 +920,6 @@ input[type='file']::file-selector-button {
 .hamburger-lines span:nth-child(3) {
   top: 18px;
 }
-.is-open .hamburger-lines span:nth-child(1) {
-  transform: translateY(9px) rotate(45deg);
-}
-.is-open .hamburger-lines span:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0.3);
-}
-.is-open .hamburger-lines span:nth-child(3) {
-  transform: translateY(-9px) rotate(-45deg);
-}
 .menu-panel {
   position: absolute;
   top: calc(100% + 12px);

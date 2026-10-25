@@ -45,7 +45,7 @@ Essa escolha segue o pedido explícito de simplificar o blog, substituindo o her
 
 ## Menu flutuante e página do autor
 
-Botão hambúrguer circular fixo no canto superior esquerdo, seguindo a referência visual. Ao abrir, o ícone se transforma em X e um pequeno painel aparece abaixo com animação de opacidade e deslocamento. O painel contém somente “Postagens” e “Sobre o autor”, com ícones desenhados à mão. O tema e os controles administrativos ficam fora dessas duas opções.
+Botão hambúrguer circular fixo no canto superior esquerdo, seguindo a referência visual. Ao abrir, o ícone mantém as três linhas e um pequeno painel aparece abaixo com animação de opacidade e deslocamento. O painel contém somente “Postagens” e “Sobre o autor”, com ícones desenhados à mão. O tema e os controles administrativos ficam fora dessas duas opções.
 
 “Sobre o autor” abre uma página separada em `?pagina=sobre`, com o nome Solano Oliveira e uma apresentação breve. Não inventar biografia, profissão, retrato ou links sociais. O menu deve fechar ao navegar, clicar fora ou pressionar Escape. Gerenciar foco de teclado e impedir interação com os links quando fechado. Respeitar movimento reduzido e áreas seguras de celulares.
 
